@@ -1,0 +1,56 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: gray;
+}
+canvas {
+  position: absolute;
+  margin: 5px;
+  /* left: 75%;
+  top: 50%;
+  transform: translate(-75%, -50%); */
+  /* width: 100%;
+  height: 50%; */
+  border: thin solid red;
+}
+
+#instruct {
+  position: absolute;
+  height: 180px;
+  width: 400px;
+  left: 40px;
+  bottom: 20px;
+  /*transform: translate(-75%, -90%); */
+  border: thin solid red;
+  background-color: rgba(0, 0, 0, 0.3);
+  /* text */
+  padding: 10px;
+  color: white;
+  font-family: verdana; 
+
+}
+
+#connected {
+  position: absolute;
+  height: 180px;
+  width: 400px;
+  right: 40px;
+  bottom: 30px;
+  /*transform: translate(-75%, -90%); */
+  background-color: rgba(0, 0, 0, 0.3);
+  /* text */
+  padding: 10px;
+  color: white;
+  font-family: verdana; 
+  font-size: 30px;
+  text-align: center;
+
+}
+
+#backgroundVid {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  min-width: 100%;
+  min-height: 100%;
+} 

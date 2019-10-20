@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8">
+
+  </head>
+  <body>
+      <video autoplay muted loop id="backgroundVid">
+          <source src="assets/moonphase.mp4" type="video/mp4">
+        </video> 
+
+    <div id="audio"></div> 
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script src="p5.js"></script>
+    <script src="sketch.js"></script>
+    <div id="middleLive"></div>
+    <div id="instruct">
+      <h2>INSTRUCTIONS</H2>
+        <ol>
+          <li>In box above, click and hold down mouse button</li>
+          <li>With mouse still pressed, read revealed line</li>
+          <li>Release button to send</li>
+          <li>Wait for response</li>
+        </ol>
+    </div>
+    <div id="connected">
+      <h1 id="nowConnected">Asymmetrical Poetry</h1>
+      </div>
+  </body>
+</html>
