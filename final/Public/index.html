@@ -1,0 +1,184 @@
+
+<html>
+
+    <head>
+        <script src="/socket.io/socket.io.js"></script>
+        <link href="https://uploads-ssl.webflow.com/5dd8411cd31f0fb93c58103a/css/gabriellas-blank-site-4e09e1.webflow.28d8516e8.css" rel="stylesheet" type="text/css" href="style.css">
+    
+        <script type="text/javascript">
+    
+            let audioNode;
+            let mediaRecorder = false;
+            var constraints = {audio: true};
+            let answered = false;
+            var count = -1;
+            audioNode = document.getElementById('audio');
+            
+    
+            var socket = io.connect('//gmg262.itp.io:8009');
+    
+            socket.on('connect', function() {
+                console.log("Connected");
+            });
+    
+            function showWaitingCopy() {
+                document.getElementById('question').innerHTML = 'Please wait for your next question...';
+                document.getElementById('answer').innerHTML = 'Breathe. Wait. Listen.';
+                document.getElementById('record').style = "display:none;";
+                document.getElementById('play').style = "display:none;";
+            }
+        
+            function forwardQuest(index){    
+                
+                var subtitle = [
+                    [
+                        'Where does your mind go when you daydream?', 
+                        'When I daydream, I go...'
+                    ],
+                    [
+                        'Who in the world knows you best? How did they become that person?',
+                        'The person who knows me best is...'
+                    ],
+                    [
+                        'If you could look into your future, what would you want to know? ',
+                        'I wish I knew... about my future'
+                    ],
+                    [
+                        'What reminds you of home?',
+                        'I am reminded of home when...'
+                    ],
+                    [
+                        'What animal do you feel a kinship with? Why?',
+                        'An animal I can relate to...'
+                    ],
+                    [
+                        'What is one thing you hope to do before you die?',
+                        'One thing I hope to do before I die...'
+    
+                    ],
+
+                    [
+                        'If you could change one thing about you last week, what would it be?',
+                        'One thing I would change about my past week...'
+                    ]
+                ];
+    
+                count = index % subtitle.length;
+                
+                const [question, answer] = subtitle[count];
+    
+
+                document.getElementById('questPrompt').innerHTML = "Question:";
+                document.getElementById('question').innerHTML = question;
+                document.getElementById('answerPrompt').innerHTML = "Begin your answer with:";
+                document.getElementById('answer').innerHTML = answer;
+                document.getElementById('record').style = "";
+                document.getElementById('play').style = "";
+                
+            }
+    
+            function startRecording() {
+                if (mediaRecorder) {
+                    mediaRecorder.start();
+                    document.getElementById('record').innerHTML = "Recording..."
+                }
+            }
+            function stopRecording() {
+                if (mediaRecorder) {
+                    mediaRecorder.stop()
+                    //document.getElementById('record').innerHTML = "Record"
+                    document.getElementById('play').innerHTML = "Sending..."
+                    document.getElementById('record').style = "display:none;";
+                }
+            }
+    
+    
+            //audio portion
+            function setMediaRecorder(mediaStream) {
+                mediaRecorder = new MediaRecorder(mediaStream);
+                mediaRecorder.onstart = function(e) {
+                    this.chunks = [];;
+                };
+                mediaRecorder.ondataavailable = function(e) {
+                    this.chunks.push(e.data);
+                };
+                mediaRecorder.onstop = function(e) {
+                    var blob = new Blob(this.chunks, {
+                        'type': 'audio/ogg; codecs=opus'
+                    });
+                    socket.emit('radio', blob);
+                    console.log('emitradio');
+                };
+            }
+    
+            // When the client receives a voice message it will play the sound
+            socket.on('voice', function(arrayBuffer) {
+                var blob = new Blob([arrayBuffer], {
+                    'type': 'audio/ogg; codecs=opus'
+                });
+                var audio = document.createElement('audio');
+                audio.src = window.URL.createObjectURL(blob);
+                audio.onended = () => { socket.emit('heardAnswer') };
+                audio.play();
+                console.log('audio is playing once');
+            });
+    
+            socket.on('nextQuestion', function(index) {
+                console.log('nextQuestion', index);
+                forwardQuest(index);
+                document.getElementById('record').innerHTML = "Record"
+                document.getElementById('play').innerHTML = "Send"
+            });
+    
+            socket.on('answerHeard', function() {
+                console.log('answerHeard');
+                socket.emit('partnerNext', count+1);
+                showWaitingCopy();
+            })
+    
+            socket.on('ready', function(ready) {
+                console.log('ready?', ready);
+                socket.emit('letsGo');
+                showWaitingCopy();
+            })
+    
+            navigator.mediaDevices.getUserMedia(constraints).then(setMediaRecorder).catch(console.log);
+           
+        </script>
+    
+    
+    </head>
+    
+    <body class="body">
+        <div id="audio"></div>
+
+        <div class="section-4">
+            <h1 class="heading">You are connected to another human.</h1>
+            <div class="instructions">This is a space to share self-reflection, secretly, together. Here&#x27;s how it works:<br>1. Wait for a question. When you are ready to record your answer, click &quot;record.&quot; <br>2. Click &quot;Send&quot; to share your response. After your partner has heard your answer, they will receive a question.<br>3. Repeat.</div>
+          </div>
+
+        <div class="section">
+            <div class="text-block" id="questPrompt"></div>
+            <!-- <div class="text-block">Question:</div> -->
+            <div class="text-block-2">
+                <p id="question"></p>   
+            </div>
+        </div>
+    
+        <div class="section">
+            <div class="text-block" id="answerPrompt"></div>
+            <!-- <div class="text-block">Answer:</div> -->
+            <div class="text-block-2">
+                <p id="answer"></p>
+            </div>
+        </div>
+    
+        <div class="container w-container">
+            <a href="#" class="button w-button" id="record" onclick="startRecording()" onmousedown="startRecording()">Record<br></a>
+            <a data-w-id="dc65fbe8-e4c6-1ae9-5b81-9ecd1d83533a" style="opacity:0" href="#" class="button w-button" id="play" onclick="stopRecording()">Send<br>‍</a>
+        </div>
+        <script src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.4.1.min.220afd743d.js" type="text/javascript" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+        <script src="js/webflow.js" type="text/javascript"></script>
+    </body>
+    
+    </html>
